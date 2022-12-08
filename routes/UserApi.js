@@ -26,5 +26,5 @@ module.exports = function (app) {
 
   app.route("/employees").get(UserApi.Employees);
 
-  app.route("/tasks/:id").get(UserApi.GetTasks);
+  app.route("/tasks/:id").get(auth, UserApi.GetTasks);
 };

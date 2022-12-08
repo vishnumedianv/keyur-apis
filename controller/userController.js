@@ -115,7 +115,12 @@ exports.register_user = async function (req, res) {
     console.log("step 1");
     // Validate user input
     if (!(userName && email && password)) {
-      res.status(400).send("All input is required");
+      throw "All input is required";
+    }
+    const oldUser = await register.findOne({ email });
+
+    if (oldUser) {
+      throw "user exist";
     }
     console.log("step 2");
     let encryptedPassword = await bcrypt.hash(password, 10);
@@ -138,17 +143,16 @@ exports.register_user = async function (req, res) {
     user.token = token;
     console.log("Step 5");
     // return new user
-    res.status(201).json(user);
+    res.status(200).json(user);
     user.save();
   } catch (err) {
-    console.log("error in register user!");
-    return res.json({ message: err });
+    res.json(err);
   }
 };
 
 //login user && admin
 exports.Login = async function (req, res) {
-  console.log('login api called')
+  console.log("login api called");
   try {
     const { email, password } = req.body;
 
@@ -178,13 +182,6 @@ exports.Login = async function (req, res) {
       res.status(200).json(user);
       const userToekn = user.token;
       const userId = user.id;
-      
-      var LocalStorage = require('node-localstorage').LocalStorage,
-      localStorage = new LocalStorage('./scratch');
-      
-      localStorage.setItem('token', userToekn);
-      localStorage.setItem('userid', userId);
-      console.log(localStorage.getItem('token'));
     } else {
       res.status(200).json({ msg: "password not match!" });
     }
@@ -193,29 +190,28 @@ exports.Login = async function (req, res) {
     res.json(err.message);
   }
 
-  console.log('executed')
+  console.log("executed");
 };
 
 //get all employees
-exports.Employees = async function(req, res){
+exports.Employees = async function (req, res) {
   try {
-    const all_users_data = await register.find()
-    res.send(all_users_data)
+    const all_users_data = await register.find();
+    res.send(all_users_data);
   } catch (error) {
-    res.send(error)
+    res.send(error);
   }
 };
 
-//get particular task 
-exports.GetTasks = async function(req, res){
-    try {
-        const userTransaction = await toDo.find({ 'addMember': req.params.id })
-        res.json(userTransaction)
-    } catch (error) {
-        next(error)
-    }
-  
-}
+//get particular task
+exports.GetTasks = async function (req, res) {
+  try {
+    const userTransaction = await toDo.find({ addMember: req.params.id });
+    res.json(userTransaction);
+  } catch (error) {
+    next(error);
+  }
+};
 
 //testing authorization
 exports.auth = function (req, res) {
