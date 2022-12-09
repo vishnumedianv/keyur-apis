@@ -21,6 +21,10 @@ const ChecklistSchema = new Schema({
   done: {
     type: Boolean,
     default: false,
-  }
+  },
+  status: {
+    type: String,
+    default: "Completed",
+  },
 });
 module.exports = mongoose.model("toDo", ChecklistSchema);

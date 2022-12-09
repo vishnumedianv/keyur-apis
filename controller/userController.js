@@ -60,7 +60,8 @@ exports.getLeaveList = async function (req, res) {
 //To do
 exports.toDo = async function (req, res) {
   try {
-    const { taskName, taskType, addMember, DueDate, Description } = req.body;
+    const { taskName, taskType, addMember, DueDate, Description, done } =
+      req.body;
 
     // Validate  input
     if (!(taskName && taskType && addMember && DueDate && Description)) {
@@ -72,6 +73,7 @@ exports.toDo = async function (req, res) {
       addMember,
       DueDate,
       Description,
+      done,
     });
     checklist.save();
     return res.json({
@@ -135,7 +137,7 @@ exports.register_user = async function (req, res) {
       { user_id: user._id, email },
       process.env.TOKEN_KEY,
       {
-        expiresIn: "2h",
+        expiresIn: 400000,
       }
     );
     console.log("step 4");
@@ -174,7 +176,7 @@ exports.Login = async function (req, res) {
         { user_id: user._id, email },
         process.env.TOKEN_KEY,
         {
-          expiresIn: "2h",
+          expiresIn: 4000000,
         }
       );
       req.user = register;
@@ -206,8 +208,8 @@ exports.Employees = async function (req, res) {
 //get particular task
 exports.GetTasks = async function (req, res) {
   try {
-    const userTransaction = await toDo.find({ addMember: req.params.id });
-    res.json(userTransaction);
+    const userTask = await toDo.find({ addMember: req.params.id });
+    res.json(userTask);
   } catch (error) {
     next(error);
   }
