@@ -15,18 +15,22 @@ const registerSchema = new mongoose.Schema({
   },
   number: {
     type: Number,
-    default: '7845960132'
+    default: "7845960132",
   },
   position: {
     type: String,
-    default: 'Software Developer'
+    default: "Software Developer",
   },
   manager: {
     type: String,
-    default: 'Jay Dalal'
+    default: "Jay Dalal",
   },
   token: {
     type: String,
+  },
+  office: {
+    type: String,
+    default: "Ahmedabad",
   },
 });
 

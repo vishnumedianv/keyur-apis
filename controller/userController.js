@@ -206,12 +206,27 @@ exports.Employees = async function (req, res) {
 };
 
 //get particular task
-exports.GetTasks = async function (req, res) {
+exports.GetTasks = async function (req, res, next) {
   try {
     const userTask = await toDo.find({ addMember: req.params.id });
     res.json(userTask);
   } catch (error) {
     next(error);
+  }
+};
+
+//update particular task
+exports.UpdateTask = async function (req, res) {
+  try {
+    const updatedTask = await toDo.findByIdAndUpdate(
+      { _id: req.params.id },
+      { $set: { done: true } },
+      { new: true }
+    );
+
+    res.send(updatedTask);
+  } catch (error) {
+    res.next(error);
   }
 };
 

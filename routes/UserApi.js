@@ -11,12 +11,11 @@ module.exports = function (app) {
   //Hr get all the leave list And the Admin who are add can also se the request
   app.route("/getLeaveList").post(UserApi.getLeaveList);
 
-  //to do
+  //add task by admin
   app.route("/Checklist").post(UserApi.toDo);
 
-  //user can see the
+  //user can see tasks
   app.route("/my-task").post(UserApi.tasklist);
-  //this api is still under progress
 
   //register
   app.route("/register").post(UserApi.register_user);
@@ -27,4 +26,6 @@ module.exports = function (app) {
   app.route("/employees").get(UserApi.Employees);
 
   app.route("/tasks/:id").get(auth, UserApi.GetTasks);
+
+  app.route("/updatetask/:id").post(UserApi.UpdateTask);
 };
