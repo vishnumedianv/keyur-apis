@@ -1,4 +1,5 @@
 "use strict";
+const admin = require("../models/admin-user");
 const leave = require("../models/leave");
 const toDo = require("../models/todo");
 const mongoose = require("mongoose");
@@ -11,6 +12,7 @@ exports.Leave_of = async function (req, res) {
   try {
     // Get user inputs
     const { SelectType, Leaves, SelectDate, Note, AddMember } = req.body;
+    const user = req.params.id;
 
     // Validate user input
     if (!(SelectType && Leaves && SelectDate && Note && AddMember)) {
@@ -23,6 +25,7 @@ exports.Leave_of = async function (req, res) {
       SelectDate,
       Note,
       AddMember,
+      user,
     });
     time_of.save();
     return res.json({
@@ -38,22 +41,10 @@ exports.Leave_of = async function (req, res) {
 
 exports.getLeaveList = async function (req, res) {
   try {
-    let leaves;
-    if (req.body.AddMember) {
-      leaves = await leave.find({});
-    } else {
-      leaves = await leave.find({});
-    }
-    if (leaves) {
-      return res.json({
-        data: leaves,
-        message: "Data fetched successful..!",
-        code: 200,
-      });
-    }
+    const allleaves = await leave.find({ user: req.params.id });
+    res.json(allleaves);
   } catch (error) {
-    console.log(error);
-    return res.json({ message: error.message });
+    next(error);
   }
 };
 
@@ -195,6 +186,91 @@ exports.Login = async function (req, res) {
   console.log("executed");
 };
 
+//admin schema
+exports.register_admin = async function (req, res) {
+  try {
+    //user input
+    const { fullName, email, password } = req.body;
+    console.log("step 1");
+    // Validate user input
+    if (!(fullName && email && password)) {
+      throw "All input is required";
+    }
+    const oldUser = await admin.findOne({ email });
+
+    if (oldUser) {
+      throw "user exist";
+    }
+    console.log("step 2");
+    let encryptedPassword = await bcrypt.hash(password, 10);
+    let user = new admin({
+      fullName,
+      email,
+      password: encryptedPassword,
+    });
+    console.log("step 3");
+    // Create token
+    const token = jwt.sign(
+      { user_id: user._id, email },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: 400000,
+      }
+    );
+    console.log("step 4");
+    // save user token
+    user.token = token;
+    console.log("Step 5");
+    // return new user
+    res.status(200).json(user);
+    user.save();
+  } catch (err) {
+    res.json(err);
+  }
+};
+
+//admin login
+exports.adminLogin = async function (req, res) {
+  console.log("login api called");
+  try {
+    const { email, password } = req.body;
+
+    if (!(email && password)) {
+      res.status(400).send("All input is required");
+    }
+
+    const user = await admin.findOne({ email });
+
+    if (
+      user === null ||
+      (await bcrypt.compare(password, user.password)) === false
+    ) {
+      res.status(400).send("Invalid Credentials");
+    }
+
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const token = jwt.sign(
+        { user_id: user._id, email },
+        process.env.TOKEN_KEY,
+        {
+          expiresIn: 4000000,
+        }
+      );
+      req.user = admin;
+      user.token = token;
+      res.status(200).json(user);
+      const userToekn = user.token;
+      const userId = user.id;
+    } else {
+      res.status(200).json({ msg: "password not match!" });
+    }
+  } catch (err) {
+    console.log("err", err);
+    res.json(err.message);
+  }
+
+  console.log("executed");
+};
 //get all employees
 exports.Employees = async function (req, res) {
   try {

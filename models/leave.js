@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 const Time_of_Schema = new Schema({
   SelectType: {
     type: String,
-    optional: ["Sick leave", "Unpaid leave"],
+    optional: ["sickleave", "unpaid"],
     required: "Select the type of leave!",
   },
   Leaves: {
@@ -19,6 +19,13 @@ const Time_of_Schema = new Schema({
     type: String,
     default: "Pending",
     optional: ["PENDING", "APPROVED", "REJECTED"],
+  },
+  user: {
+    type: String,
+  },
+  statusType: {
+    type: String,
+    default: "warning",
   },
 });
 module.exports = mongoose.model("leave", Time_of_Schema);
