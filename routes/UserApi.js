@@ -23,7 +23,7 @@ module.exports = function (app) {
   //user login
   app.route("/login").post(UserApi.Login);
 
-  app.route("/employees").get(auth, UserApi.Employees);
+  app.route("/employees").get(UserApi.Employees);
 
   app.route("/tasks/:id").get(auth, UserApi.GetTasks);
 
@@ -31,4 +31,11 @@ module.exports = function (app) {
 
   //admin-user
   app.route("/login/admin").post(UserApi.adminLogin);
+
+  //edit user profile
+  app.route("/updateprofile/:id").post(UserApi.updateProfile);
+  //get profile
+  app.route("/myprofile/:id").get(UserApi.MyProfile);
+
+  app.route("/dates").get(UserApi.date);
 };

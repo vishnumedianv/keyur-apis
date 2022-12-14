@@ -196,14 +196,14 @@ exports.register_admin = async function (req, res) {
     if (!(fullName && email && password)) {
       throw "All input is required";
     }
-    const oldUser = await admin.findOne({ email });
+    const oldUser = await register.findOne({ email });
 
     if (oldUser) {
       throw "user exist";
     }
     console.log("step 2");
     let encryptedPassword = await bcrypt.hash(password, 10);
-    let user = new admin({
+    let user = new register({
       fullName,
       email,
       password: encryptedPassword,
@@ -274,7 +274,9 @@ exports.adminLogin = async function (req, res) {
 //get all employees
 exports.Employees = async function (req, res) {
   try {
-    const all_users_data = await register.find();
+    const all_users_data = await register
+      .find()
+      .select(["fullName", "email", "number", "position", "manager", "office"]);
     res.send(all_users_data);
   } catch (error) {
     res.send(error);
@@ -303,6 +305,76 @@ exports.UpdateTask = async function (req, res) {
     res.send(updatedTask);
   } catch (error) {
     res.next(error);
+  }
+};
+
+exports.updateProfile = async function (req, res, next) {
+  try {
+    const {
+      fullName,
+      number,
+      Gender,
+      DOB,
+      Address,
+      City,
+      Country,
+      Postal,
+      Bank_name,
+      Account_name,
+      Account_no,
+      Branch,
+    } = await req.body;
+    console.log(req.params.id);
+    const userInfo = await register.findByIdAndUpdate(
+      { _id: req.params.id },
+      {
+        $set: {
+          fullName: fullName,
+          number: number,
+          Info: {
+            DOB: DOB,
+            Gender: Gender,
+            Address: {
+              Address: Address,
+              City: City,
+              Country: Country,
+              Postal: Postal,
+            },
+            Bank: {
+              Bank_name: Bank_name,
+              Account_name: Account_name,
+              Account_no: Account_no,
+              Branch: Branch,
+            },
+          },
+        },
+      },
+      { new: true }
+    );
+    res.json(userInfo);
+    next();
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+//my profile
+exports.MyProfile = async function (req, res, next) {
+  try {
+    const myprofile = await register.findById(req.params.id);
+    res.json(myprofile);
+  } catch (error) {
+    res.json(error);
+  }
+};
+
+exports.date = async function (req, res, next) {
+  try {
+    const userDate = await register.find().select("Info.DOB");
+    res.json(userDate);
+    next();
+  } catch (error) {
+    next(error);
   }
 };
 
