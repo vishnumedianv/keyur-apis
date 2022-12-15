@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const registerSchema = new mongoose.Schema({
+  admin: {
+    type: Boolean,
+    default: true,
+  },
   fullName: {
     type: String,
     Required: "Please enter the full name",

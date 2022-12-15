@@ -154,7 +154,9 @@ exports.Login = async function (req, res) {
     }
 
     const user = await register.findOne({ email });
-
+    if (!user) {
+      res.json("user not found");
+    }
     if (
       user === null ||
       (await bcrypt.compare(password, user.password)) === false
@@ -204,6 +206,49 @@ exports.register_admin = async function (req, res) {
     console.log("step 2");
     let encryptedPassword = await bcrypt.hash(password, 10);
     let user = new register({
+      fullName,
+      email,
+      password: encryptedPassword,
+    });
+    console.log("step 3");
+    // Create token
+    const token = jwt.sign(
+      { user_id: user._id, email },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: 400000,
+      }
+    );
+    console.log("step 4");
+    // save user token
+    user.token = token;
+    console.log("Step 5");
+    // return new user
+    res.status(200).json(user);
+    user.save();
+  } catch (err) {
+    res.json(err);
+  }
+};
+
+exports.register_user = async function (req, res) {
+  try {
+    //user input
+    const { fullName, email, password } = req.body;
+    console.log("step 1");
+    // Validate user input
+    if (!(fullName && email && password)) {
+      throw "All input is required";
+    }
+    const oldUser = await register.findOne({ email });
+
+    if (oldUser) {
+      throw "user exist";
+    }
+    console.log("step 2");
+    let encryptedPassword = await bcrypt.hash(password, 10);
+    let user = new register({
+      admin: false,
       fullName,
       email,
       password: encryptedPassword,
@@ -362,6 +407,16 @@ exports.updateProfile = async function (req, res, next) {
 exports.MyProfile = async function (req, res, next) {
   try {
     const myprofile = await register.findById(req.params.id);
+    res.json(myprofile);
+  } catch (error) {
+    res.json(error);
+  }
+};
+
+//get admin profile
+exports.MyAdminProfile = async function (req, res, next) {
+  try {
+    const myprofile = await admin.findById(req.params.id);
     res.json(myprofile);
   } catch (error) {
     res.json(error);

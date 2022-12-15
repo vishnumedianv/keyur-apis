@@ -20,6 +20,9 @@ module.exports = function (app) {
   //register
   app.route("/register").post(UserApi.register_admin);
 
+  //user register by admin portal
+  app.route("/register/user").post(UserApi.register_user);
+
   //user login
   app.route("/login").post(UserApi.Login);
 
@@ -36,6 +39,9 @@ module.exports = function (app) {
   app.route("/updateprofile/:id").post(UserApi.updateProfile);
   //get profile
   app.route("/myprofile/:id").get(UserApi.MyProfile);
+
+  //get admin profile
+  app.route("/myadminprofile/:id").get(UserApi.MyAdminProfile);
 
   app.route("/dates").get(UserApi.date);
 };
