@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const path = require("path");
+const register = require("./models/register");
 require("./config/database").connect();
 
 const app = express();
@@ -24,12 +25,22 @@ const upload = multer({
 
 app.use("/profile", express.static("upload/images"));
 
-app.post("/upload", upload.single("recfile"), (req, res) => {
-  console.log(req.file);
-  res.json({
-    success: 1,
-    profile_url: `http://localhost:7000/profile${req.file.filename}`,
-  });
+app.post("/upload/:id", upload.single("recfile"), async (req, res) => {
+  try {
+    const updatepic = await register.findByIdAndUpdate(
+      { _id: req.params.id },
+      {
+        $set: {
+          profile_pic: `http://localhost:7000/profile/${req.file.filename}`,
+        },
+      },
+      { new: true }
+    );
+
+    res.send(updatepic);
+  } catch (error) {
+    res.next(error);
+  }
 });
 
 app.use(express.json());

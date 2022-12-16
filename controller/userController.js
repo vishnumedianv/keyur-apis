@@ -10,32 +10,10 @@ const register = require("../models/register"),
 
 exports.Leave_of = async function (req, res) {
   try {
-    // Get user inputs
-    const { SelectType, Leaves, SelectDate, Note, AddMember } = req.body;
-    const user = req.params.id;
-
-    // Validate user input
-    if (!(SelectType && Leaves && SelectDate && Note && AddMember)) {
-      res.status(400).send("All input is required");
-    }
-
-    let time_of = new leave({
-      SelectType,
-      Leaves,
-      SelectDate,
-      Note,
-      AddMember,
-      user,
-    });
-    time_of.save();
-    return res.json({
-      data: time_of,
-      message: "Record save successful..!",
-      code: 200,
-    });
+    const allleaves = await leave.find();
+    res.json(allleaves);
   } catch (err) {
     console.log("err.message");
-    return res.json({ message: err.message });
   }
 };
 
@@ -231,10 +209,11 @@ exports.register_admin = async function (req, res) {
   }
 };
 
-exports.register_user = async function (req, res) {
+//user registration by admin panel only
+exports.New_user = async function (req, res) {
   try {
     //user input
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, position } = req.body;
     console.log("step 1");
     // Validate user input
     if (!(fullName && email && password)) {
@@ -251,6 +230,7 @@ exports.register_user = async function (req, res) {
       admin: false,
       fullName,
       email,
+      position,
       password: encryptedPassword,
     });
     console.log("step 3");
@@ -321,7 +301,15 @@ exports.Employees = async function (req, res) {
   try {
     const all_users_data = await register
       .find()
-      .select(["fullName", "email", "number", "position", "manager", "office"]);
+      .select([
+        "fullName",
+        "email",
+        "number",
+        "position",
+        "manager",
+        "office",
+        "profile_pic",
+      ]);
     res.send(all_users_data);
   } catch (error) {
     res.send(error);

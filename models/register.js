@@ -19,14 +19,13 @@ const registerSchema = new mongoose.Schema({
   },
   number: {
     type: Number,
-    default: "7845960132",
   },
   department: {
     type: String,
   },
   position: {
     type: String,
-    default: "Software Developer",
+    default: "MediaNV",
   },
   manager: {
     type: String,
@@ -55,6 +54,10 @@ const registerSchema = new mongoose.Schema({
       Account_no: { type: Number, default: "" },
       Branch: { type: String, default: "" },
     },
+  },
+  profile_pic: {
+    type: String,
+    default: "",
   },
 });
 

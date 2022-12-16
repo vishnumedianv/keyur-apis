@@ -6,7 +6,7 @@ module.exports = function (app) {
   const UserApi = require("../controller/userController");
 
   //request for the leave
-  app.route("/leave/:id").post(UserApi.Leave_of);
+  app.route("/leaves").get(UserApi.Leave_of);
 
   //Hr get all the leave list And the Admin who are add can also se the request
   app.route("/getLeaveList/:id").get(UserApi.getLeaveList);
@@ -21,7 +21,7 @@ module.exports = function (app) {
   app.route("/register").post(UserApi.register_admin);
 
   //user register by admin portal
-  app.route("/register/user").post(UserApi.register_user);
+  app.route("/register/user").post(UserApi.New_user);
 
   //user login
   app.route("/login").post(UserApi.Login);
