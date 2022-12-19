@@ -6,10 +6,13 @@ module.exports = function (app) {
   const UserApi = require("../controller/userController");
 
   //request for the leave
-  app.route("/leaves").get(UserApi.Leave_of);
+  app.route("/leave/:id").post(UserApi.Leave_of);
 
   //Hr get all the leave list And the Admin who are add can also se the request
   app.route("/getLeaveList/:id").get(UserApi.getLeaveList);
+
+  //get all leaves (only for admin)
+  app.route("/leavereq").get(UserApi.Leaves);
 
   //add task by admin
   app.route("/Checklist").post(UserApi.toDo);
@@ -28,9 +31,14 @@ module.exports = function (app) {
 
   app.route("/employees").get(UserApi.Employees);
 
+  app.route("/alltask").get(UserApi.Tasks);
+
   app.route("/tasks/:id").get(auth, UserApi.GetTasks);
 
   app.route("/updatetask/:id").post(UserApi.UpdateTask);
+
+  //admin leave management
+  app.route("/updateleavestatus/:id").post(UserApi.UpdateLeave);
 
   //admin-user
   app.route("/login/admin").post(UserApi.adminLogin);

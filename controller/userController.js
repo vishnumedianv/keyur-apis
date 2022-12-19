@@ -8,15 +8,38 @@ const register = require("../models/register"),
   bcrypt = require("bcrypt"),
   jwt = require("jsonwebtoken");
 
+//request new leave
 exports.Leave_of = async function (req, res) {
   try {
-    const allleaves = await leave.find();
-    res.json(allleaves);
+    // Get user inputs
+    const { SelectType, Leaves, SelectDate, Note, AddMember } = req.body;
+    const user = req.params.id;
+
+    // Validate user input
+    if (!(SelectType && Leaves && SelectDate && Note && AddMember)) {
+      res.status(400).send("All input is required");
+    }
+    let time_of = new leave({
+      SelectType,
+      Leaves,
+      SelectDate,
+      Note,
+      AddMember,
+      user,
+    });
+    time_of.save();
+    return res.json({
+      data: time_of,
+      message: "Record save successful..!",
+      code: 200,
+    });
   } catch (err) {
     console.log("err.message");
+    return res.json({ message: err.message });
   }
 };
 
+//get leave list particular user
 exports.getLeaveList = async function (req, res) {
   try {
     const allleaves = await leave.find({ user: req.params.id });
@@ -26,11 +49,28 @@ exports.getLeaveList = async function (req, res) {
   }
 };
 
+//get all leaves
+exports.Leaves = async function (req, res) {
+  try {
+    const all_leave_requests = await leave.find();
+    res.json(all_leave_requests);
+  } catch (error) {
+    next(error);
+  }
+};
+
 //To do
 exports.toDo = async function (req, res) {
   try {
-    const { taskName, taskType, addMember, DueDate, Description, done } =
-      req.body;
+    const {
+      taskName,
+      taskType,
+      addMember,
+      DueDate,
+      Description,
+      statusType,
+      status,
+    } = req.body;
 
     // Validate  input
     if (!(taskName && taskType && addMember && DueDate && Description)) {
@@ -42,7 +82,8 @@ exports.toDo = async function (req, res) {
       addMember,
       DueDate,
       Description,
-      done,
+      statusType,
+      status,
     });
     checklist.save();
     return res.json({
@@ -316,6 +357,17 @@ exports.Employees = async function (req, res) {
   }
 };
 
+//get all employees
+exports.Tasks = async function (req, res) {
+  try {
+    const all_tasks = await toDo.find();
+
+    res.send(all_tasks);
+  } catch (error) {
+    res.send(error);
+  }
+};
+
 //get particular task
 exports.GetTasks = async function (req, res, next) {
   try {
@@ -331,11 +383,32 @@ exports.UpdateTask = async function (req, res) {
   try {
     const updatedTask = await toDo.findByIdAndUpdate(
       { _id: req.params.id },
-      { $set: { done: true } },
+      { $set: { done: true, status: "Completed", statusType: "success" } },
       { new: true }
     );
 
     res.send(updatedTask);
+  } catch (error) {
+    res.next(error);
+  }
+};
+
+//update particular task
+exports.UpdateLeave = async function (req, res) {
+  try {
+    const newobj = {
+      Approved: "success",
+      Pending: "warning",
+      Rejected: "danger",
+    };
+    const value = req.body.status;
+    const updatedLeave = await leave.findByIdAndUpdate(
+      { _id: req.params.id },
+      { $set: { status: value, statusType: newobj[value] } },
+      { new: true }
+    );
+
+    res.send(updatedLeave);
   } catch (error) {
     res.next(error);
   }
@@ -411,6 +484,7 @@ exports.MyAdminProfile = async function (req, res, next) {
   }
 };
 
+//get dob
 exports.date = async function (req, res, next) {
   try {
     const userDate = await register.find().select("Info.DOB");
