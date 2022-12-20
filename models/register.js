@@ -40,7 +40,7 @@ const registerSchema = new mongoose.Schema({
   },
   Info: {
     Gender: { type: String, default: "" },
-    DOB: { type: String, default: "" },
+    DOB: { type: Date, default: "" },
     Address: {
       Address: { type: String, default: "" },
       City: { type: String, default: "" },

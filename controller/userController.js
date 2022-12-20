@@ -12,17 +12,29 @@ const register = require("../models/register"),
 exports.Leave_of = async function (req, res) {
   try {
     // Get user inputs
-    const { SelectType, Leaves, SelectDate, Note, AddMember } = req.body;
+    const {
+      SelectType,
+      Leaves,
+      Note,
+      AddMember,
+      startTime,
+      endTime,
+      startDate,
+      endDate,
+    } = req.body;
     const user = req.params.id;
 
     // Validate user input
-    if (!(SelectType && Leaves && SelectDate && Note && AddMember)) {
+    if (!(SelectType && Leaves && Note && AddMember)) {
       res.status(400).send("All input is required");
     }
     let time_of = new leave({
       SelectType,
       Leaves,
-      SelectDate,
+      startDate,
+      endDate,
+      startTime,
+      endTime,
       Note,
       AddMember,
       user,
