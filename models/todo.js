@@ -13,7 +13,7 @@ const ChecklistSchema = new Schema({
   addMember: {
     type: Array,
   },
-  DueDate: { type: String },
+  DueDate: { type: Date },
   Description: {
     type: String,
   },

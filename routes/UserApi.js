@@ -32,6 +32,8 @@ module.exports = function (app) {
   app.route("/employees").get(UserApi.Employees);
 
   app.route("/alltask").get(UserApi.Tasks);
+  //get all leaves just user NAME
+  app.route("/usertask/:id").get(UserApi.getUserName);
 
   app.route("/tasks/:id").get(auth, UserApi.GetTasks);
 

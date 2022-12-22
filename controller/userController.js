@@ -71,6 +71,16 @@ exports.Leaves = async function (req, res) {
   }
 };
 
+//get user Name
+exports.getUserName = async function (req, res) {
+  try {
+    const user_Name = await register.findById(req.params.id).select("fullName");
+    res.json(user_Name);
+  } catch (error) {
+    next(error);
+  }
+};
+
 //To do
 exports.toDo = async function (req, res) {
   try {
@@ -200,23 +210,19 @@ exports.Login = async function (req, res) {
         { user_id: user._id, email },
         process.env.TOKEN_KEY,
         {
-          expiresIn: 4000000,
+          expiresIn: "400000",
         }
       );
-      req.user = register;
+      req.user = user;
       user.token = token;
       res.status(200).json(user);
-      const userToekn = user.token;
-      const userId = user.id;
     } else {
       res.status(200).json({ msg: "password not match!" });
     }
   } catch (err) {
     console.log("err", err);
-    res.json(err.message);
+    res.json({ message: err });
   }
-
-  console.log("executed");
 };
 
 //admin schema
@@ -331,7 +337,7 @@ exports.adminLogin = async function (req, res) {
         { user_id: user._id, email },
         process.env.TOKEN_KEY,
         {
-          expiresIn: 4000000,
+          expiresIn: "259200000",
         }
       );
       req.user = admin;
@@ -499,7 +505,7 @@ exports.MyAdminProfile = async function (req, res, next) {
 //get dob
 exports.date = async function (req, res, next) {
   try {
-    const userDate = await register.find().select("Info.DOB");
+    const userDate = await register.find().select(["Info.DOB", "fullName"]);
     res.json(userDate);
     next();
   } catch (error) {
