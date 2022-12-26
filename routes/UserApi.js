@@ -32,6 +32,7 @@ module.exports = function (app) {
   app.route("/employees").get(UserApi.Employees);
 
   app.route("/alltask").get(UserApi.Tasks);
+
   //get all leaves just user NAME
   app.route("/usertask/:id").get(UserApi.getUserName);
 
@@ -54,4 +55,16 @@ module.exports = function (app) {
   app.route("/myadminprofile/:id").get(UserApi.MyAdminProfile);
 
   app.route("/dates").get(UserApi.date);
+
+  //delete user
+  app.route("/deleteuser/:id").delete(UserApi.deleteuser);
+
+  //delete task
+  app.route("/deltask/:id").delete(UserApi.deltask);
+
+  //create notification
+  app.route("/notify").post(UserApi.NotifyUser);
+
+  //get all notification by id
+  app.route("/notify/:id").get(UserApi.getNotifications);
 };

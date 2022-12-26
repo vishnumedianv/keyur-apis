@@ -2,6 +2,7 @@
 const admin = require("../models/admin-user");
 const leave = require("../models/leave");
 const toDo = require("../models/todo");
+const noti = require("../models/notifications");
 const mongoose = require("mongoose");
 const register = require("../models/register"),
   auth = require("../middleware/auth"),
@@ -186,7 +187,6 @@ exports.register_user = async function (req, res) {
 
 //login user && admin
 exports.Login = async function (req, res) {
-  console.log("login api called");
   try {
     const { email, password } = req.body;
 
@@ -230,24 +230,35 @@ exports.register_admin = async function (req, res) {
   try {
     //user input
     const { fullName, email, password } = req.body;
-    console.log("step 1");
+
     // Validate user input
     if (!(fullName && email && password)) {
       throw "All input is required";
+    }
+
+    let username = email;
+
+    let r = new RegExp(`${username.split("@")[1]}`);
+
+    let old = await register.find();
+    for (let i = 0; i < old.length; i++) {
+      if (r.test(old[i])) {
+        throw "domain already exist";
+      }
     }
     const oldUser = await register.findOne({ email });
 
     if (oldUser) {
       throw "user exist";
     }
-    console.log("step 2");
+
     let encryptedPassword = await bcrypt.hash(password, 10);
     let user = new register({
       fullName,
       email,
       password: encryptedPassword,
     });
-    console.log("step 3");
+
     // Create token
     const token = jwt.sign(
       { user_id: user._id, email },
@@ -256,10 +267,10 @@ exports.register_admin = async function (req, res) {
         expiresIn: 400000,
       }
     );
-    console.log("step 4");
+
     // save user token
     user.token = token;
-    console.log("Step 5");
+
     // return new user
     res.status(200).json(user);
     user.save();
@@ -272,7 +283,7 @@ exports.register_admin = async function (req, res) {
 exports.New_user = async function (req, res) {
   try {
     //user input
-    const { fullName, email, password, position } = req.body;
+    const { fullName, email, password, position, admin } = req.body;
     console.log("step 1");
     // Validate user input
     if (!(fullName && email && password)) {
@@ -286,7 +297,7 @@ exports.New_user = async function (req, res) {
     console.log("step 2");
     let encryptedPassword = await bcrypt.hash(password, 10);
     let user = new register({
-      admin: false,
+      admin,
       fullName,
       email,
       position,
@@ -432,6 +443,7 @@ exports.UpdateLeave = async function (req, res) {
   }
 };
 
+//update profile
 exports.updateProfile = async function (req, res, next) {
   try {
     const {
@@ -508,6 +520,67 @@ exports.date = async function (req, res, next) {
     const userDate = await register.find().select(["Info.DOB", "fullName"]);
     res.json(userDate);
     next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+//delete user
+exports.deleteuser = async function (req, res, next) {
+  try {
+    let setuser = await register.findById(req.params.id);
+    if (!setuser) {
+      res.json({ msg: "uer not found" });
+    } else {
+      let delUser = await register.findByIdAndDelete(req.params.id);
+      res.json(delUser);
+    }
+  } catch (error) {
+    res.json({ msg: "error" });
+    next();
+  }
+};
+
+//delete task
+exports.deltask = async function (req, res, next) {
+  try {
+    let setuser = await toDo.findById(req.params.id);
+    if (!setuser) {
+      res.json({ msg: "uer not found" });
+    } else {
+      let delUser = await toDo.findByIdAndDelete(req.params.id);
+      res.json(delUser);
+    }
+  } catch (error) {
+    res.json({ msg: "error" });
+    next();
+  }
+};
+
+//add notification for user
+exports.NotifyUser = async function (req, res, next) {
+  try {
+    const { user, notificationmsg } = req.body;
+    const date = Date.now();
+    let notification = new noti({
+      user,
+      notificationmsg,
+      date,
+    });
+
+    notification.save();
+    res.json({ notification });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//get all notifications by tasks
+exports.getNotifications = async function (req, res, next) {
+  try {
+    const allnoti = await noti.find({ user: req.params.id });
+
+    res.json(allnoti);
   } catch (error) {
     next(error);
   }
