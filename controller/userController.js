@@ -4,6 +4,10 @@ const leave = require("../models/leave");
 const toDo = require("../models/todo");
 const noti = require("../models/notifications");
 const mongoose = require("mongoose");
+
+const nodemailer = require("nodemailer");
+const randomstring = require("randomstring");
+
 const register = require("../models/register"),
   auth = require("../middleware/auth"),
   bcrypt = require("bcrypt"),
@@ -557,6 +561,22 @@ exports.deltask = async function (req, res, next) {
   }
 };
 
+//delete notification
+exports.delNoti = async function (req, res, next) {
+  try {
+    let setuser = await noti.findById(req.params.id);
+    if (!setuser) {
+      res.json({ msg: "noti not found" });
+    } else {
+      let delUser = await noti.findByIdAndDelete(req.params.id);
+      res.json(delUser);
+    }
+  } catch (error) {
+    res.json({ msg: "error" });
+    next();
+  }
+};
+
 //add notification for user
 exports.NotifyUser = async function (req, res, next) {
   try {
@@ -586,6 +606,97 @@ exports.getNotifications = async function (req, res, next) {
   }
 };
 
+//passwor reset
+
+//1. forgot password
+exports.forgotPass = async (req, res, next) => {
+  try {
+    const email = req.body.email;
+
+    let user = await register.findOne({ email: email });
+    if (!user) {
+      return res.status(400).json({
+        msg: "user not found",
+      });
+    }
+    const temp = randomstring.generate();
+    sendresetmail(user.fullName, user.email, temp);
+
+    await register.findByIdAndUpdate(
+      { _id: user.id },
+      { $set: { temp: temp } },
+      { new: true }
+    );
+
+    res.status(200).send("Email sent");
+  } catch (err) {
+    res.status(400).json({
+      msg: "not found",
+    });
+    next();
+  }
+};
+
+const sendresetmail = async (fullName, email, temp) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      auth: {
+        user: "krista56@ethereal.email",
+        pass: "KxrjUz7SEwUUuJGBgN",
+      },
+    });
+
+    const mailOptions = {
+      from: "krista56@ethereal.email",
+      to: "wirova3970@fdsdfdfddfddfdfdfdd.com",
+      subject: "Reset password",
+      html:
+        '<p> Hi, please click <a href="http://localhost:8080/#/resetpassword?token=' +
+        temp +
+        '"> here</a>',
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("mail sent", info.response);
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//2. reset password
+exports.resetPass = async (req, res) => {
+  try {
+    const temp = req.query.token;
+    const tokenData = await register.findOne({ temp: temp });
+    if (!temp) {
+      res.status(400).json({
+        msg: "invalid token",
+      });
+    }
+
+    const password = req.body.newPassword;
+    const updatedPassword = await bcrypt.hash(password, 10);
+
+    const userData = await register.findByIdAndUpdate(
+      { _id: tokenData.id },
+      { $set: { password: updatedPassword, temp: "" } },
+      { new: true }
+    );
+
+    res.status(200).json(userData);
+  } catch (error) {
+    res.status(400).json({
+      msg: "something went wrong",
+    });
+  }
+};
 //testing authorization
 exports.auth = function (req, res) {
   res.status(200).send("Welcome to the BLACK PEARL site ");

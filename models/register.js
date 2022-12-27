@@ -33,6 +33,11 @@ const registerSchema = new mongoose.Schema({
   },
   token: {
     type: String,
+    default: "",
+  },
+  temp: {
+    type: String,
+    default: "",
   },
   office: {
     type: String,

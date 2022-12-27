@@ -62,9 +62,16 @@ module.exports = function (app) {
   //delete task
   app.route("/deltask/:id").delete(UserApi.deltask);
 
+  //delete notifications
+  app.route("/deletenoti/:id").delete(UserApi.delNoti);
+
   //create notification
   app.route("/notify").post(UserApi.NotifyUser);
 
   //get all notification by id
   app.route("/notify/:id").get(UserApi.getNotifications);
+
+  //reset password
+  app.route("/forgot").post(UserApi.forgotPass);
+  app.route("/resetpass").post(UserApi.resetPass);
 };
