@@ -74,4 +74,9 @@ module.exports = function (app) {
   //reset password
   app.route("/forgot").post(UserApi.forgotPass);
   app.route("/resetpass").post(UserApi.resetPass);
+
+  //events
+  app.route("/events").post(UserApi.event);
+
+  app.route("/getevent").get(UserApi.getevent);
 };

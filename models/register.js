@@ -64,6 +64,10 @@ const registerSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  joinDate: {
+    type: Date,
+    default: Date.now(),
+  },
 });
 
 module.exports = mongoose.model("user", registerSchema);

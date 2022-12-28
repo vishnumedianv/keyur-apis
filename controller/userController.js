@@ -4,7 +4,7 @@ const leave = require("../models/leave");
 const toDo = require("../models/todo");
 const noti = require("../models/notifications");
 const mongoose = require("mongoose");
-
+const news = require("../models/events");
 const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
 
@@ -287,7 +287,7 @@ exports.register_admin = async function (req, res) {
 exports.New_user = async function (req, res) {
   try {
     //user input
-    const { fullName, email, password, position, admin } = req.body;
+    const { fullName, email, password, position, manager, admin } = req.body;
     console.log("step 1");
     // Validate user input
     if (!(fullName && email && password)) {
@@ -305,6 +305,7 @@ exports.New_user = async function (req, res) {
       fullName,
       email,
       position,
+      manager,
       password: encryptedPassword,
     });
     console.log("step 3");
@@ -376,6 +377,7 @@ exports.Employees = async function (req, res) {
     const all_users_data = await register
       .find()
       .select([
+        "admin",
         "fullName",
         "email",
         "number",
@@ -695,6 +697,34 @@ exports.resetPass = async (req, res) => {
     res.status(400).json({
       msg: "something went wrong",
     });
+  }
+};
+
+//events/news
+exports.event = async function (req, res) {
+  try {
+    const { title, eventDate, detail } = req.body;
+
+    let occasions = new news({
+      title,
+      eventDate,
+      detail,
+    });
+    res.json(occasions);
+    occasions.save();
+  } catch (error) {
+    res.json(error.message);
+  }
+};
+
+//get events/news
+exports.getevent = async function (req, res) {
+  try {
+    const allnoti = await news.find({ user: req.params.id });
+
+    res.json(allnoti);
+  } catch (error) {
+    next(error);
   }
 };
 //testing authorization
