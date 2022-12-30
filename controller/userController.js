@@ -287,7 +287,8 @@ exports.register_admin = async function (req, res) {
 exports.New_user = async function (req, res) {
   try {
     //user input
-    const { fullName, email, password, position, manager, admin } = req.body;
+    const { fullName, email, password, position, manager, admin, joinDate } =
+      req.body;
     console.log("step 1");
     // Validate user input
     if (!(fullName && email && password)) {
@@ -301,6 +302,7 @@ exports.New_user = async function (req, res) {
     console.log("step 2");
     let encryptedPassword = await bcrypt.hash(password, 10);
     let user = new register({
+      joinDate,
       admin,
       fullName,
       email,
@@ -523,7 +525,9 @@ exports.MyAdminProfile = async function (req, res, next) {
 //get dob
 exports.date = async function (req, res, next) {
   try {
-    const userDate = await register.find().select(["Info.DOB", "fullName"]);
+    const userDate = await register
+      .find()
+      .select(["Info.DOB", "fullName", "profile_pic", "joinDate"]);
     res.json(userDate);
     next();
   } catch (error) {
