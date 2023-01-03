@@ -36,7 +36,7 @@ module.exports = function (app) {
   //get all leaves just user NAME
   app.route("/usertask/:id").get(UserApi.getUserName);
 
-  app.route("/tasks/:id").get(auth, UserApi.GetTasks);
+  app.route("/tasks/:id").get(UserApi.GetTasks);
 
   app.route("/updatetask/:id").post(UserApi.UpdateTask);
 
@@ -79,4 +79,9 @@ module.exports = function (app) {
   app.route("/events").post(UserApi.event);
 
   app.route("/getevent").get(UserApi.getevent);
+
+  //dashboard
+  app.route("/userprofiles").get(UserApi.getUserupdate);
+
+  app.route("/leaveupdate").get(UserApi.getleaveupdate);
 };

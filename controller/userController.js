@@ -79,7 +79,7 @@ exports.Leaves = async function (req, res) {
 //get user Name
 exports.getUserName = async function (req, res) {
   try {
-    const user_Name = await register.findById(req.params.id).select("fullName");
+    const user_Name = await register.findById(req.params.id);
     res.json(user_Name);
   } catch (error) {
     next(error);
@@ -409,7 +409,7 @@ exports.Tasks = async function (req, res) {
 exports.GetTasks = async function (req, res, next) {
   try {
     const userTask = await toDo.find({ addMember: req.params.id });
-    res.json(userTask);
+    res.send(userTask);
   } catch (error) {
     next(error);
   }
@@ -731,6 +731,27 @@ exports.getevent = async function (req, res) {
     next(error);
   }
 };
+
+//dashboard
+exports.getUserupdate = async function (req, res) {
+  try {
+    const userdetails = await register.find();
+    const thisday = await leave.find();
+    res.json({ userdetails, thisday });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getleaveupdate = async function (req, res) {
+  try {
+    const thisday = await leave.find();
+    res.json(thisday);
+  } catch (error) {
+    next(error);
+  }
+};
+
 //testing authorization
 exports.auth = function (req, res) {
   res.status(200).send("Welcome to the BLACK PEARL site ");
