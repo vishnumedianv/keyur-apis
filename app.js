@@ -9,38 +9,82 @@ require("./config/database").connect();
 const app = express();
 app.use(cors());
 
-const Storage = multer.diskStorage({
-  destination: "./upload/images",
-  filename: (req, file, cb) => {
-    return cb(
-      null,
-      `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
+//file upload
 
-const upload = multer({
-  storage: Storage,
-});
+const saltedMd5 = require("salted-md5");
 
-app.use("/profile", express.static("upload/images"));
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.use(express.urlencoded());
+app.use(express.json());
+// const Storage = multer.diskStorage({
+//   destination: "./upload/images",
+//   filename: (req, file, cb) => {
+//     return cb(
+//       null,
+//       `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`
+//     );
+//   },
+// });
+
+// const upload = multer({
+//   storage: Storage,
+// });
+
+// app.use("/profile", express.static("upload/images"));
+
+// app.post("/upload/:id", upload.single("recfile"), async (req, res) => {
+//   try {
+//     const updatepic = await register.findByIdAndUpdate(
+//       { _id: req.params.id },
+//       {
+//         $set: {
+//           profile_pic: `http://localhost:7000/profile/${req.file.filename}`,
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     res.send(updatepic);
+//   } catch (error) {
+//     res.next(error);
+//   }
+// });
+
+//firebase
+var admin = require("firebase-admin");
+
+var serviceAccount = require("./serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://fir-project-1-58a04.firebaseio.com",
+  storageBucket: process.env.BUCKET_URL,
+});
+app.locals.bucket = admin.storage().bucket();
+let db = admin.firestore();
+
+let a = db.collection("users");
 
 app.post("/upload/:id", upload.single("recfile"), async (req, res) => {
-  try {
-    const updatepic = await register.findByIdAndUpdate(
-      { _id: req.params.id },
-      {
-        $set: {
-          profile_pic: `http://localhost:7000/profile/${req.file.filename}`,
-        },
-      },
-      { new: true }
-    );
+  const name = saltedMd5(req.file.originalname, "SUPER-S@LT!");
+  const fileName = name + path.extname(req.file.originalname);
+  await app.locals.bucket
+    .file(fileName)
+    .createWriteStream()
+    .end(req.file.buffer);
 
-    res.send(updatepic);
-  } catch (error) {
-    res.next(error);
-  }
+  const updatepic = await register.findByIdAndUpdate(
+    { _id: req.params.id },
+    {
+      $set: {
+        profile_pic: `https://firebasestorage.googleapis.com/v0/b/mnv-frontend.appspot.com/o/${fileName}?alt=media`,
+      },
+    },
+    { new: true }
+  );
+
+  res.send(updatepic);
 });
 
 app.use(express.json());
